@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+ 
+:root {
+  color-scheme: dark;
+}
+ 
+* {
+  box-sizing: border-box;
+}
+ 
+html, body, #root {
+  height: 100%;
+}
+ 
+html {
+  scroll-behavior: smooth;
+}
+ 
+body {
+  margin: 0;
+  background: #0b0610;
+  color: #F5F2F8;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+ 
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(168, 85, 247, 0.25); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(168, 85, 247, 0.45); }
+ 
+::selection {
+  background: rgba(168, 85, 247, 0.4);
+  color: #fff;
+}
+ 
+input, textarea, select, button { font: inherit; }
+ 
+.glass {
+  background: rgba(18, 10, 26, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(168, 85, 247, 0.16);
+}
+ 
+.glass-strong {
+  background: rgba(14, 7, 22, 0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(168, 85, 247, 0.22);
+}
+ 
+.text-gradient {
+  background: linear-gradient(135deg, #c084fc 0%, #e879f9 50%, #a855f7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+ 
+.bg-glow {
+  background-image: radial-gradient(
+    circle at 50% 0%,
+    rgba(168, 85, 247, 0.25) 0%,
+    transparent 60%
+  );
+}

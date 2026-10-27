@@ -1,0 +1,93 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    match /users/{uid} {
+      allow read: if true;
+      allow create: if isOwner(uid);
+
+      // Two allowed update paths:
+      //  A) Owner updates own profile (but NOT protected fields)
+      //  B) Anyone can +1 'views' (auto-init if missing)
+      allow update: if (
+        (isOwner(uid)
+          && !request.resource.data.diff(resource.data).affectedKeys()
+               .hasAny(['premium', 'premiumUntil', 'verified', 'badges', 'role', 'createdAt', 'views']))
+        ||
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views'])
+          && request.resource.data.views is number
+          && (
+            // Existing views → must be +1
+            (resource.data.keys().hasAny(['views'])
+              && request.resource.data.views == resource.data.get('views', 0) + 1)
+            ||
+            // No views yet → can init to 1
+            (!resource.data.keys().hasAny(['views'])
+              && request.resource.data.views == 1)
+          ))
+      );
+
+      allow delete: if isOwner(uid);
+
+      match /links/{linkId} {
+        allow read: if true;
+        allow write: if isOwner(uid);
+      }
+      match /socials/{socialId} {
+        allow read: if true;
+        allow write: if isOwner(uid);
+      }
+      match /widgets/{widgetId} {
+        allow read: if true;
+        allow write: if isOwner(uid);
+      }
+      match /notifications/{notifId} {
+        allow read, write: if isOwner(uid);
+      }
+      match /analytics/{eventId} {
+        allow read: if isOwner(uid);
+        allow create: if true;
+        allow update, delete: if false;
+      }
+    }
+
+    match /usernames/{username} {
+      allow read: if true;
+      allow create: if isSignedIn()
+        && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isSignedIn()
+        && resource.data.uid == request.auth.uid;
+    }
+
+    match /redeemCodes/{code} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    match /redeemHistory/{uid}/entries/{entryId} {
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid);
+      allow update, delete: if false;
+    }
+
+    match /verificationApplications/{uid} {
+      allow read: if isOwner(uid);
+      allow create, update: if isOwner(uid);
+      allow delete: if false;
+    }
+
+    match /analyticsDaily/{uid}/days/{day} {
+      allow read: if isOwner(uid);
+      allow create, update: if request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['date', 'views', 'linkClicks', 'socialClicks']);
+      allow delete: if false;
+    }
+  }
+}
